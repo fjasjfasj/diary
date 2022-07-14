@@ -1,0 +1,42 @@
+:root {
+  --foreground-color: black;
+  --background-color: white;
+  --link-color: darkblue;
+
+  --rate-none-color: #dbdbdb;
+  --rate-1-color: #e7b6b6;
+  --rate-2-color: #dfc6a7;
+  --rate-3-color: #e2e7a7;
+  --rate-4-color: #c5e6af;
+  --rate-5-color: #c1abe3;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --foreground-color: white;
+    --background-color: black;
+    --link-color: lightblue;
+
+    --rate-none-color: #1b1b1b;
+    --rate-1-color: #301717;
+    --rate-2-color: #413321;
+    --rate-3-color: #353719;
+    --rate-4-color: #1c2814;
+    --rate-5-color: #1e142f;
+  }
+}
+
+[hidden] {
+  display: none !important;
+}
+
+* {
+  color: var(--foreground-color);
+  background: var(--background-color);
+}
+
+:focus-visible {
+  outline: 2px solid var(--foreground-color);
+  position: relative;
+  z-index: 1;
+}
