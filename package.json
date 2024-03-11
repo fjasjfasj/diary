@@ -1,4 +1,5 @@
 {
+  "type": "module",
   "scripts": {
     "dev": "run-p vite-dev firebase-emulators",
     "firebase-emulators": "firebase emulators:start",
