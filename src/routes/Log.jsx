@@ -5,7 +5,7 @@ import { getAuth, signOut } from 'firebase/auth';
 
 import Entry from '../components/Entry';
 import LinkButton from '../components/LinkButton';
-import { today } from '../util/dates';
+import { today as todayFn } from '../util/dates';
 import useUser from '../hooks/use-user';
 
 const auth = getAuth();
@@ -60,6 +60,7 @@ function makeDateLink(year, month, delta) {
 function Log({ year, month }) {
   const [user] = useUser();
 
+  const today = todayFn();
   const isCurrentMonth =
     Number(year) === today.year && Number(month) === today.month;
 

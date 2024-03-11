@@ -5,7 +5,7 @@ import ReactHelmet from 'react-helmet';
 
 import Log from '../routes/Log';
 import Auth from '../routes/Auth';
-import { today } from '../util/dates';
+import { today as todayFn } from '../util/dates';
 import Message from '../routes/Message';
 import ErrorBoundary from './ErrorBoundary';
 import useUser from '../hooks/use-user';
@@ -30,6 +30,7 @@ const LoadingIcon = styled.img`
 
 function App() {
   const [user, userLoading, userError] = useUser();
+  const today = todayFn();
 
   if (userError) throw userError;
 
