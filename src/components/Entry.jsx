@@ -8,7 +8,7 @@ import useUser from '../hooks/use-user';
 const db = getDatabase();
 
 const Container = styled.section`
-  background: ${(props) => `var(--rate-${props.rate}-color)`};
+  background: ${(props) => `var(--rate-${props.$rate}-color)`};
 
   * {
     background: inherit;
@@ -40,7 +40,7 @@ const Rate = styled.form`
   padding-bottom: 0;
   line-height: 1.15;
 
-  opacity: ${(props) => (props.isLoading ? 0.5 : 1)};
+  opacity: ${(props) => (props.$isLoading ? 0.5 : 1)};
 `;
 
 const StarContainer = styled.div`
@@ -109,13 +109,13 @@ function Entry({ year, month, date, isToday, hidden }) {
   };
 
   return (
-    <Container rate={rate || 'none'} hidden={hidden}>
+    <Container $rate={rate || 'none'} hidden={hidden}>
       <Header onClick={() => setIsOpen(!isOpen)}>
         <DateButton>
           <Date>{date}</Date>
         </DateButton>
 
-        <Rate isLoading={loading} hidden={!isOpen}>
+        <Rate $isLoading={loading} hidden={!isOpen}>
           <h3>How did this day go?</h3>
 
           <StarContainer onClick={(e) => e.stopPropagation()}>
