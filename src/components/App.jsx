@@ -9,23 +9,12 @@ import { today as todayFn } from '../util/dates';
 import Message from '../routes/Message';
 import ErrorBoundary from './ErrorBoundary';
 import useUser from '../hooks/use-user';
+import LoadingScreen from './LoadingScreen';
 
 export const Container = styled.div`
   margin: 0 auto;
   max-width: 30rem;
   padding: 1rem;
-`;
-
-const LoadingIcon = styled.img`
-  display: block;
-  margin: 0 auto;
-  margin-top: 4rem;
-  width: 4rem;
-
-  @media (prefers-color-scheme: dark) {
-    filter: invert();
-    background: white;
-  }
 `;
 
 function App() {
@@ -37,7 +26,7 @@ function App() {
   if (userLoading) {
     return (
       <Container>
-        <LoadingIcon src="/assets/light/icon.svg" alt="Loading" />
+        <LoadingScreen />
       </Container>
     );
   }

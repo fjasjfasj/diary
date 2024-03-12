@@ -4,6 +4,7 @@ import { Link } from 'wouter';
 import { getAuth, signOut } from 'firebase/auth';
 
 import Entry from '../components/Entry';
+import Heading from '../components/Heading';
 import LinkButton from '../components/LinkButton';
 import { today as todayFn } from '../util/dates';
 import useUser from '../hooks/use-user';
@@ -12,11 +13,6 @@ const auth = getAuth();
 
 const Header = styled.header`
   margin-bottom: 1rem;
-`;
-
-const Heading = styled.h1`
-  font-size: 1.5em;
-  font-weight: bold;
 `;
 
 const Nav = styled.nav`

@@ -9,15 +9,10 @@ import {
 } from 'firebase/auth';
 import { handleEmailLink, sendEmailLink } from '../util/firebase';
 
+import Heading from '../components/Heading';
 import _LinkButton from '../components/LinkButton';
 
 const auth = getAuth();
-
-const Heading = styled.p`
-  font-size: 2em;
-  font-weight: bold;
-  margin-bottom: 1rem;
-`;
 
 const FormContainer = styled.form`
   display: flex;
@@ -127,13 +122,13 @@ function Auth({ action }) {
   };
 
   if (state === 'signing-in') {
-    return <Heading>Signing in…</Heading>;
+    return <Heading as="p">Signing in…</Heading>;
   }
 
   if (state === 'waiting-for-link') {
     return (
       <>
-        <Heading>Email sent</Heading>
+        <Heading as="p">Email sent</Heading>
         <LinkButton onClick={resetState}>Cancel</LinkButton>
       </>
     );
@@ -142,7 +137,7 @@ function Auth({ action }) {
   if (state === 'sending-link') {
     return (
       <>
-        <Heading>Sending an email…</Heading>
+        <Heading as="p">Sending an email…</Heading>
         <LinkButton onClick={resetState}>Cancel</LinkButton>
       </>
     );
@@ -152,7 +147,7 @@ function Auth({ action }) {
     if (action === 'upgrade-account') {
       return (
         <>
-          <Heading>Save diary to account</Heading>
+          <Heading as="p">Save diary to account</Heading>
           <Form onSubmit={handleSubmit} />
           <LinkButton as={Link} href="/">
             Cancel
@@ -164,7 +159,7 @@ function Auth({ action }) {
     if (action === 'sign-in') {
       return (
         <>
-          <Heading>Sign in to continue</Heading>
+          <Heading as="p">Sign in to continue</Heading>
           <Form onSubmit={handleSubmit} />
           <LinkButton onClick={anonymousSignIn}>
             Continue without account
@@ -179,7 +174,7 @@ function Auth({ action }) {
   // unknown state
   return (
     <>
-      <Heading>Something went wrong</Heading>
+      <Heading as="p">Something went wrong</Heading>
       <LinkButton onClick={resetState}>Try again</LinkButton>
       <LinkButton as={Link} href="/">
         Return to home page
