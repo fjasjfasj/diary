@@ -76,7 +76,16 @@ function Helmet() {
           name="theme-color"
           content={colorScheme === 'light' ? '#ffffff' : '#000000'}
         />
-        <link rel="icon" href={`/assets/${colorScheme}/icon.svg`} />
+        <link
+          rel="icon"
+          href={`/assets/${colorScheme}/icon.png`}
+          type="image/png"
+        />
+        <link
+          rel="icon"
+          href={`/assets/${colorScheme}/icon.svg`}
+          type="image/svg+xml"
+        />
         <link
           rel="apple-touch-icon"
           href={`/assets/${colorScheme}/apple-touch-icon.png`}

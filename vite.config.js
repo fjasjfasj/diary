@@ -6,6 +6,7 @@ const assetsList = [
   'apple-touch-icon.png',
   'icon-maskable.png',
   'icon.svg',
+  'icon.png',
   'manifest.json',
 ];
 
