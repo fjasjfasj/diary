@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState } from 'react';
 import { getDatabase, onValue, ref } from 'firebase/database';
+import { useEffect, useRef, useState } from 'react';
 
 const db = getDatabase();
 
@@ -24,7 +24,7 @@ function useDb(path) {
       (error) => {
         setError(error);
         setLoading(false);
-      }
+      },
     );
   }, [path]);
 

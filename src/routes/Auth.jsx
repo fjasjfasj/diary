@@ -1,186 +1,267 @@
-import { useEffect, useState } from 'react';
-import styled from 'styled-components';
-import { Link, useLocation } from 'wouter';
-
 import {
+  createUserWithEmailAndPassword,
   getAuth,
-  isSignInWithEmailLink,
-  signInAnonymously,
+  sendEmailVerification,
+  sendPasswordResetEmail,
+  signInWithEmailAndPassword,
 } from 'firebase/auth';
-import { handleEmailLink, sendEmailLink } from '../util/firebase';
+import { useCallback, useState } from 'react';
+import styled from 'styled-components';
+import { Redirect, useLocation, useParams } from 'wouter';
 
-import Heading from '../components/Heading';
-import _LinkButton from '../components/LinkButton';
+import Heading from '../styled/Heading';
+import Link, { LinkSet } from '../styled/Link';
+import LoadingScreen from '../styled/LoadingScreen';
 
 const auth = getAuth();
 
 const FormContainer = styled.form`
   display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
   margin-bottom: 1rem;
 `;
 
-const Input = styled.input`
-  font-size: 1.5em;
-  padding: 0.5rem;
-  border-bottom: 2px dashed;
+const InputContainer = styled.div`
+  display: flex;
+  border-bottom: 2px solid;
+  font-size: 1.3rem;
 
-  flex: 1;
-  width: 0;
-
-  ::placeholder {
-    font-style: italic;
+  > * {
+    padding: 0.5rem;
   }
 `;
 
-const InputButton = styled.button`
-  font-size: 1.5em;
-  font-weight: bold;
-  padding: 0.5rem;
-  border-bottom: 2px solid;
+const Input = styled.input`
+  width: 100%;
+`;
+
+const SubmitButton = styled.button`
   cursor: pointer;
 `;
 
-const LinkButton = styled(_LinkButton)`
-  display: block;
-`;
+async function signIn(email, password) {
+  try {
+    const userCredential = await signInWithEmailAndPassword(
+      auth,
+      email,
+      password,
+    );
+    console.log('signed in', 'userCredential', userCredential);
+  } catch (error) {
+    console.error(error);
+    switch (error.code) {
+      case 'auth/invalid-credential':
+        alert('Wrong email or password. Please try again');
+        break;
+      default:
+        alert(`An unknown error occurred. Please try again.\n${error.message}`);
+        break;
+    }
+    throw error;
+  }
+}
 
-function Form({ onSubmit }) {
-  const [email, setEmail] = useState('');
+async function createAccount(email, password) {
+  try {
+    const userCredential = await createUserWithEmailAndPassword(
+      auth,
+      email,
+      password,
+    );
+    await sendEmailVerification(userCredential.user);
+    alert('Account created! Follow email link to confirm');
+    console.log('account created', 'userCredential', userCredential);
+  } catch (error) {
+    console.error(error);
+    switch (error.code) {
+      case 'auth/weak-password':
+        alert('Password too weak. 6 characters minimum. Please try again');
+        break;
+      case 'auth/email-already-in-use':
+        alert('Email already in use. Please try again');
+        break;
+      case 'auth/invalid-email':
+        alert('Email invalid. Please try again');
+        break;
+      default:
+        alert(`An unknown error occurred. Please try again.\n${error.message}`);
+        break;
+    }
+    throw error;
+  }
+}
 
-  const handleFormSubmit = (event) => {
+async function resetPassword(email) {
+  try {
+    await sendPasswordResetEmail(auth, email);
+    alert('Link sent. Check your email');
+  } catch (error) {
+    console.error(error);
+    switch (error.code) {
+      case 'auth/invalid-email':
+        alert('Email invalid. Please try again');
+        break;
+      case 'auth/user-not-found':
+        alert('User not found. Please try again');
+        break;
+      default:
+        alert(`An unknown error occurred. Please try again.\n${error.message}`);
+        break;
+    }
+    throw error;
+  }
+}
+
+/* field example:
+  {
+    type: 'email', // input type
+    placeholder: 'email',
+    key: 'oldEmail' // results object key
+  }
+*/
+export const fieldPresets = {
+  email: {
+    type: 'email', // <input type="...">
+    placeholder: 'email', // <input placeholder="...">
+    key: 'email', // submit result: { _email_: '...' }
+  },
+  password: {
+    type: 'password',
+    placeholder: 'password',
+    key: 'password',
+  },
+};
+
+export function Form({ fields, onSubmit }) {
+  const [values, setValue] = useState({});
+
+  const handleSubmit = (event) => {
     event.preventDefault();
-    onSubmit(email);
+    onSubmit(values);
   };
 
+  const submitButton = <SubmitButton>→</SubmitButton>;
+
   return (
-    <FormContainer onSubmit={handleFormSubmit}>
-      <Input
-        type="email"
-        required
-        placeholder="your email"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-      />
-      <InputButton>Done</InputButton>
+    <FormContainer onSubmit={handleSubmit}>
+      {fields.map((field, i) => (
+        <InputContainer key={field.key}>
+          <Input
+            type={field.type}
+            placeholder={field.placeholder}
+            required
+            onChange={(e) =>
+              setValue((prev) => ({
+                ...prev,
+                [field.key]: e.target.value,
+              }))
+            }
+          />
+          {i + 1 === fields.length && submitButton}
+        </InputContainer>
+      ))}
     </FormContainer>
   );
 }
 
-function getDefaultState() {
-  if (isSignInWithEmailLink(auth, window.location.href)) {
-    return 'signing-in';
-  }
-
-  return 'default';
-}
-
-function Auth({ action }) {
-  // ['default', 'sending-link', 'waiting-for-link', 'signing-in']
-  const [state, setState] = useState(getDefaultState);
+export default function Auth() {
+  const { action } = useParams();
   const [, setLocation] = useLocation();
+  const [isLoading, setIsLoading] = useState(false);
 
-  useEffect(() => {
+  const _signIn = useCallback(({ email, password }) => {
     (async () => {
-      if (isSignInWithEmailLink(auth, window.location.href)) {
-        const email = new URL(window.location).searchParams.get('email');
-
-        try {
-          setState('signing-in');
-          await handleEmailLink(email, action);
-
-          if (action === 'upgrade-account') {
-            setLocation(`/m/upgrade-complete`);
-          }
-          if (action === 'delete-account') {
-            setLocation(`/m/delete-complete`);
-          }
-        } catch (error) {
-          console.error(error);
-          setState('error');
-        }
+      try {
+        setIsLoading(true);
+        await signIn(email, password);
+      } finally {
+        setIsLoading(false);
       }
     })();
-  }, [action, setLocation]);
+  }, []);
 
-  const handleSubmit = async (email) => {
-    setState('sending-link');
+  const _createAccount = useCallback(({ email, password }) => {
+    (async () => {
+      try {
+        setIsLoading(true);
+        await createAccount(email, password);
+      } finally {
+        setIsLoading(false);
+      }
+    })();
+  }, []);
 
-    try {
-      await sendEmailLink(email, action);
-      setState('waiting-for-link');
-    } catch (error) {
-      console.error(error);
-      setState('error');
-    }
-  };
-
-  const resetState = () => setState('default');
-
-  const anonymousSignIn = async () => {
-    setState('signing-in');
-    await signInAnonymously(auth);
-  };
-
-  if (state === 'signing-in') {
-    return <Heading as="p">Signing in…</Heading>;
-  }
-
-  if (state === 'waiting-for-link') {
-    return (
-      <>
-        <Heading as="p">Email sent</Heading>
-        <LinkButton onClick={resetState}>Cancel</LinkButton>
-      </>
-    );
-  }
-
-  if (state === 'sending-link') {
-    return (
-      <>
-        <Heading as="p">Sending an email…</Heading>
-        <LinkButton onClick={resetState}>Cancel</LinkButton>
-      </>
-    );
-  }
-
-  if (state === 'default') {
-    if (action === 'upgrade-account') {
-      return (
-        <>
-          <Heading as="p">Save diary to account</Heading>
-          <Form onSubmit={handleSubmit} />
-          <LinkButton as={Link} href="/">
-            Cancel
-          </LinkButton>
-        </>
-      );
-    }
-
-    if (action === 'sign-in') {
-      return (
-        <>
-          <Heading as="p">Sign in to continue</Heading>
-          <Form onSubmit={handleSubmit} />
-          <LinkButton onClick={anonymousSignIn}>
-            Continue without account
-          </LinkButton>
-        </>
-      );
-    }
-  }
-
-  if (action === 'delete-account') return null;
-
-  // unknown state
-  return (
-    <>
-      <Heading as="p">Something went wrong</Heading>
-      <LinkButton onClick={resetState}>Try again</LinkButton>
-      <LinkButton as={Link} href="/">
-        Return to home page
-      </LinkButton>
-    </>
+  const _resetPassword = useCallback(
+    ({ email }) => {
+      (async () => {
+        try {
+          setIsLoading(true);
+          await resetPassword(email);
+          setLocation('/auth');
+        } finally {
+          setIsLoading(false);
+        }
+      })();
+    },
+    [setLocation],
   );
-}
 
-export default Auth;
+  if (isLoading) {
+    return <LoadingScreen />;
+  }
+
+  if (action == null) {
+    // sign-in
+    return (
+      <>
+        <Heading>Hello! Sign in to continue</Heading>
+        <Form
+          fields={[fieldPresets.email, fieldPresets.password]}
+          onSubmit={_signIn}
+        />
+        <LinkSet>
+          <li>
+            <Link href="/auth/create-account">Create account</Link>
+          </li>
+          <li>
+            <Link href="/auth/reset-password">Reset password</Link>
+          </li>
+        </LinkSet>
+      </>
+    );
+  }
+
+  if (action === 'create-account') {
+    return (
+      <>
+        <Heading>Create an account</Heading>
+        <Form
+          fields={[fieldPresets.email, fieldPresets.password]}
+          onSubmit={_createAccount}
+        />
+        <LinkSet>
+          <li>
+            <Link href="/auth">Go back</Link>
+          </li>
+        </LinkSet>
+      </>
+    );
+  }
+
+  if (action === 'reset-password') {
+    return (
+      <>
+        <Heading>Reset password</Heading>
+        <Form fields={[fieldPresets.email]} onSubmit={_resetPassword} />
+        <LinkSet>
+          <li>
+            <Link href="/auth">Go back</Link>
+          </li>
+        </LinkSet>
+      </>
+    );
+  }
+
+  return <Redirect to="/" />;
+}

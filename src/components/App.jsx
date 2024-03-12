@@ -1,15 +1,16 @@
 import { useEffect, useState } from 'react';
+import ReactHelmet from 'react-helmet';
 import styled from 'styled-components';
 import { Redirect, Route, Switch } from 'wouter';
-import ReactHelmet from 'react-helmet';
 
-import Log from '../routes/Log';
-import Auth from '../routes/Auth';
-import { today as todayFn } from '../util/dates';
-import Message from '../routes/Message';
-import ErrorBoundary from './ErrorBoundary';
 import useUser from '../hooks/use-user';
-import LoadingScreen from './LoadingScreen';
+import Account from '../routes/Account';
+import Auth from '../routes/Auth';
+import Log from '../routes/Log';
+import LoadingScreen from '../styled/LoadingScreen';
+import { today as todayFn } from '../util/dates';
+import ErrorBoundary from './ErrorBoundary';
+import ErrorMessage from './ErrorMessage';
 
 export const Container = styled.div`
   margin: 0 auto;
@@ -21,7 +22,14 @@ function App() {
   const [user, userLoading, userError] = useUser();
   const today = todayFn();
 
-  if (userError) throw userError;
+  if (userError) {
+    return (
+      <ErrorMessage
+        message="There's an error with your account"
+        actions={['sign-out', 'home']}
+      />
+    );
+  }
 
   if (userLoading) {
     return (
@@ -34,18 +42,9 @@ function App() {
   return (
     <Container>
       <Switch>
-        <Route path="/m/:type*">{(params) => <Message {...params} />}</Route>
-        <Route path="/auth/:action">{(params) => <Auth {...params} />}</Route>
-
-        {!user && (
-          <Route path="/auth">
-            <Auth action="sign-in" />
-          </Route>
-        )}
-
-        {user && (
-          <Route path="/:year/:month">{(params) => <Log {...params} />}</Route>
-        )}
+        {!user && <Route path="/auth/:action?" component={Auth} />}
+        {user && <Route path="/account/:action?" component={Account} />}
+        {user && <Route path="/:year/:month" component={Log} />}
 
         <Route>
           <Redirect to={user ? `/${today.year}/${today.month}` : '/auth'} />

@@ -1,7 +1,8 @@
-import { Fragment, useEffect, useState } from 'react';
 import { getDatabase, ref, set } from 'firebase/database';
-import styled from 'styled-components';
+import { Fragment, useEffect, useState } from 'react';
 import TextareaAutosize from 'react-textarea-autosize';
+import styled from 'styled-components';
+
 import useDb from '../hooks/use-db';
 import useUser from '../hooks/use-user';
 

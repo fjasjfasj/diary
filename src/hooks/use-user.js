@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
+import { useEffect, useState } from 'react';
 
 const auth = getAuth();
 
@@ -22,7 +22,7 @@ function useUser() {
       (error) => {
         setError(error);
         setLoading(false);
-      }
+      },
     );
   }, []);
 

@@ -1,15 +1,11 @@
+import { useEffect } from 'react';
 import styled from 'styled-components';
-import { Link } from 'wouter';
-
-import { getAuth, signOut } from 'firebase/auth';
+import { useLocation, useParams } from 'wouter';
 
 import Entry from '../components/Entry';
-import Heading from '../components/Heading';
-import LinkButton from '../components/LinkButton';
+import Heading from '../styled/Heading';
+import Link from '../styled/Link';
 import { today as todayFn } from '../util/dates';
-import useUser from '../hooks/use-user';
-
-const auth = getAuth();
 
 const Header = styled.header`
   margin-bottom: 1rem;
@@ -30,11 +26,6 @@ const Nav = styled.nav`
 
 const Footer = styled.footer`
   margin-top: 2rem;
-
-  li {
-    display: inline-block;
-    margin-right: 1rem;
-  }
 `;
 
 function dateToString(date) {
@@ -53,19 +44,28 @@ function makeDateLink(year, month, delta) {
   };
 }
 
-function Log({ year, month }) {
-  const [user] = useUser();
+function Log() {
+  const { year: yearParam, month: monthParam } = useParams();
+  const year = Number(yearParam);
+  const month = Number(monthParam);
+
+  const [, setLocation] = useLocation();
+
+  useEffect(() => {
+    if (Number.isNaN(year) || Number.isNaN(month)) {
+      setLocation('/');
+    }
+  }, [year, month, setLocation]);
 
   const today = todayFn();
-  const isCurrentMonth =
-    Number(year) === today.year && Number(month) === today.month;
+  const isCurrentMonth = year === today.year && month === today.month;
 
   const prevLink = makeDateLink(year, month, -1);
   const nextLink = makeDateLink(year, month, 1);
 
   const entriesAmount = isCurrentMonth
     ? today.date
-    : new Date(year, month, 0).getDate();
+    : new Date(year, month, 0).getDate(); // amount of days in month
 
   return (
     <>
@@ -106,21 +106,7 @@ function Log({ year, month }) {
         ))}
 
       <Footer>
-        <ul>
-          <li hidden={!user?.isAnonymous}>
-            <LinkButton as={Link} href="/auth/upgrade-account">
-              Save diary to account
-            </LinkButton>
-          </li>
-          <li hidden={user?.isAnonymous}>
-            <LinkButton onClick={() => signOut(auth)}>Sign out</LinkButton>
-          </li>
-          <li>
-            <LinkButton as={Link} href="/m/delete-account">
-              Delete account
-            </LinkButton>
-          </li>
-        </ul>
+        <Link href="/account">Manage account</Link>
       </Footer>
     </>
   );
