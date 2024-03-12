@@ -1,14 +1,14 @@
 :root {
   --foreground-color: black;
   --background-color: white;
-  --link-color: darkblue;
+  --link-color: blue;
 
   --rate-none-color: #dbdbdb;
-  --rate-1-color: #e7b6b6;
-  --rate-2-color: #dfc6a7;
-  --rate-3-color: #e2e7a7;
-  --rate-4-color: #c5e6af;
-  --rate-5-color: #c1abe3;
+  --rate-1-color: #ef9a9a;
+  --rate-2-color: #ffcc80;
+  --rate-3-color: #fff59d;
+  --rate-4-color: #a5d6a7;
+  --rate-5-color: #b39ddb;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -17,11 +17,11 @@
     --background-color: black;
     --link-color: lightblue;
 
-    --rate-none-color: #1b1b1b;
-    --rate-1-color: #301717;
-    --rate-2-color: #413321;
-    --rate-3-color: #353719;
-    --rate-4-color: #1c2814;
+    --rate-none-color: #252525;
+    --rate-1-color: #2f1415;
+    --rate-2-color: #2f2014;
+    --rate-3-color: #2f2d14;
+    --rate-4-color: #252f14;
     --rate-5-color: #1e142f;
   }
 }
@@ -39,4 +39,9 @@
   outline: 2px solid var(--foreground-color);
   position: relative;
   z-index: 1;
+}
+
+::placeholder {
+  font-style: italic;
+  opacity: 0.7;
 }
