@@ -51,6 +51,8 @@ async function signIn(email, password) {
   } catch (error) {
     console.error(error);
     switch (error.code) {
+      case 'auth/user-not-found':
+      case 'auth/wrong-password':
       case 'auth/invalid-credential':
         alert('Wrong email or password. Please try again');
         break;
@@ -242,7 +244,7 @@ export default function Auth() {
         />
         <LinkSet>
           <li>
-            <Link href="/auth">Go back</Link>
+            <Link href="/auth">← Go back</Link>
           </li>
         </LinkSet>
       </>
@@ -256,7 +258,7 @@ export default function Auth() {
         <Form fields={[fieldPresets.email]} onSubmit={_resetPassword} />
         <LinkSet>
           <li>
-            <Link href="/auth">Go back</Link>
+            <Link href="/auth">← Go back</Link>
           </li>
         </LinkSet>
       </>
