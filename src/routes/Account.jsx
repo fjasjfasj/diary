@@ -161,7 +161,7 @@ function Account() {
     <>
       <Heading>Account</Heading>
       <Paragraph>
-        Email: {user.email} ({!user.emailVerified && 'not '}verified)
+        Email: {user.email} {!user.emailVerified && ' (not verified)'}
       </Paragraph>
       <LinkSet $direction="column">
         <li>
