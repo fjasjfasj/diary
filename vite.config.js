@@ -26,6 +26,9 @@ export default defineConfig({
       ],
       manifest: false,
       registerType: 'autoUpdate',
+      workbox: {
+        navigateFallbackDenylist: [/\/__\/*/],
+      },
     }),
   ],
 });
