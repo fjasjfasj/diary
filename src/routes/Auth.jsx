@@ -95,7 +95,6 @@ export function Form({ fields, onSubmit }) {
 
 export default function Auth() {
   const { action } = useParams();
-  const [alert, setAlert] = useContext(AlertContext);
   const [isLoading, setIsLoading] = useState(false);
 
   const signIn = async ({ email, password }) => {
@@ -146,8 +145,6 @@ export default function Auth() {
       setIsLoading(false);
     }
   };
-
-  if (alert) return alert;
 
   if (isLoading) {
     return <LoadingScreen />;

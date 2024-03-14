@@ -37,6 +37,7 @@ async function reauthenticate(password) {
 
 function AccountAction({ action }) {
   const [alert, setAlert] = useContext(AlertContext);
+  const [, setAlert] = useContext(AlertContext);
 
   const changeEmail = async ({ password, email }) => {
     try {
@@ -69,8 +70,6 @@ function AccountAction({ action }) {
       setAlert(['error', error.code]);
     }
   };
-
-  if (alert) return alert;
 
   // eslint-disable-next-line default-case
   switch (action) {
