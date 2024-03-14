@@ -12,7 +12,6 @@ import LoadingScreen from '../styled/LoadingScreen';
 import { today as todayFn } from '../util/dates';
 import Alert, { AlertContext } from './Alert';
 import ErrorBoundary from './ErrorBoundary';
-import ErrorMessage from './ErrorMessage';
 
 export const Container = styled.div`
   margin: 0 auto;
@@ -23,28 +22,21 @@ export const Container = styled.div`
 function App() {
   const [user, userLoading, userError] = useUser();
   const [isLoading, setIsLoading] = useLoading();
-  const [alert] = useContext(AlertContext);
+  const [alert, setAlert] = useContext(AlertContext);
   const today = todayFn();
 
   useEffect(() => {
     setIsLoading(userLoading);
   }, [userLoading, setIsLoading]);
 
+  useEffect(() => {
+    if (userError) setAlert(['error', userError.code]);
+  }, [userError, setAlert]);
+
   if (alert) {
     return (
       <Container>
         <Alert />
-      </Container>
-    );
-  }
-
-  if (userError) {
-    return (
-      <Container>
-        <ErrorMessage
-          message="There's an error with your account"
-          actions={['sign-out', 'home']}
-        />
       </Container>
     );
   }

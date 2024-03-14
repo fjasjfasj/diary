@@ -10,7 +10,6 @@ import {
 } from 'firebase/auth';
 import { getDatabase, ref, remove } from 'firebase/database';
 import { useContext } from 'react';
-import styled from 'styled-components';
 import { Redirect, useParams } from 'wouter';
 
 import { AlertContext } from '../components/Alert';
@@ -19,14 +18,11 @@ import useUser from '../hooks/use-user';
 import Heading from '../styled/Heading';
 import Link, { LinkSet } from '../styled/Link';
 import LoadingScreen from '../styled/LoadingScreen';
+import { Paragraph } from '../styled/Paragraph';
 import { fieldPresets, Form } from './Auth';
 
 const auth = getAuth();
 const db = getDatabase();
-
-const Paragraph = styled.p`
-  margin-bottom: 1rem;
-`;
 
 async function reauthenticate(password) {
   const credential = EmailAuthProvider.credential(

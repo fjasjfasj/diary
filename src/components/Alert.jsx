@@ -1,14 +1,10 @@
 import { createContext, useContext } from 'react';
-import styled from 'styled-components';
 import { useLocation } from 'wouter';
 
 import Heading from '../styled/Heading';
 import Link from '../styled/Link';
-
-const Paragraph = styled.p`
-  font-size: 1.1;
-  margin-bottom: 1rem;
-`;
+import { Paragraph } from '../styled/Paragraph';
+import { ErrorLinkSet } from './ErrorBoundary';
 
 function getAlert(kind, code) {
   const getInfo = () => {
@@ -91,7 +87,7 @@ function Alert() {
   const [kind, code, backPath] = alert;
   const alertContent = getAlert(kind, code);
 
-  const handleClick = () => {
+  const handleBackClick = () => {
     setAlert(null);
     if (backPath) setLocation(backPath);
   };
@@ -100,9 +96,14 @@ function Alert() {
     <>
       <Heading>{alertContent.heading}</Heading>
       {alertContent.text && <Paragraph>{alertContent.text}</Paragraph>}
-      <Link as="button" onClick={handleClick}>
-        {kind === 'info' ? 'Done' : '← Go back'}
-      </Link>
+      {alertContent.code && <Paragraph as="pre">Error code: {alertContent.code}</Paragraph>}
+      {kind === 'info' ? (
+        <Link as="button" onClick={handleBackClick}>
+          Done
+        </Link>
+      ) : (
+        <ErrorLinkSet onGoBack={handleBackClick} />
+      )}
     </>
   );
 }
