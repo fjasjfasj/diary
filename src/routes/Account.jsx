@@ -14,6 +14,7 @@ import styled from 'styled-components';
 import { Redirect, useParams } from 'wouter';
 
 import { AlertContext } from '../components/Alert';
+import useLoading from '../hooks/use-loading';
 import useUser from '../hooks/use-user';
 import Heading from '../styled/Heading';
 import Link, { LinkSet } from '../styled/Link';
@@ -36,31 +37,38 @@ async function reauthenticate(password) {
 }
 
 function AccountAction({ action }) {
-  const [alert, setAlert] = useContext(AlertContext);
   const [, setAlert] = useContext(AlertContext);
+  const [, setIsLoading] = useLoading();
 
   const changeEmail = async ({ password, email }) => {
     try {
+      setIsLoading(true);
       await reauthenticate(password);
       await updateEmail(auth.currentUser, email);
       setAlert(['info', 'email-updated', '/account']);
     } catch (error) {
       console.error(error);
       setAlert(['error', error.code]);
+    } finally {
+      setIsLoading(false);
     }
   };
   const changePassword = async ({ oldPassword, newPassword }) => {
     try {
+      setIsLoading(true);
       await reauthenticate(oldPassword);
       await updatePassword(auth.currentUser, newPassword);
       setAlert(['info', 'password-updated', '/account']);
     } catch (error) {
       console.error(error);
       setAlert(['error', error.code]);
+    } finally {
+      setIsLoading(false);
     }
   };
   const deleteAccount = async ({ password }) => {
     try {
+      setIsLoading(true);
       await reauthenticate(password);
       await remove(ref(db, `users/${auth.currentUser.uid}`));
       await deleteUser(auth.currentUser);
@@ -68,6 +76,8 @@ function AccountAction({ action }) {
     } catch (error) {
       console.error(error);
       setAlert(['error', error.code]);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -132,6 +142,7 @@ function AccountAction({ action }) {
 
 function Account() {
   const [alert, setAlert] = useContext(AlertContext);
+  const [, setIsLoading] = useLoading();
   const { action } = useParams();
   const [user, userLoading] = useUser();
 
@@ -144,8 +155,10 @@ function Account() {
   if (alert) return alert;
 
   const resendLink = async () => {
+    setIsLoading(true);
     await sendEmailVerification(auth.currentUser);
     setAlert(['info', 'link-sent']);
+    setIsLoading(false);
   };
 
   return (

@@ -10,6 +10,7 @@ import styled from 'styled-components';
 import { Redirect, useParams } from 'wouter';
 
 import { AlertContext } from '../components/Alert';
+import useLoading from '../hooks/use-loading';
 import Heading from '../styled/Heading';
 import Link, { LinkSet } from '../styled/Link';
 import LoadingScreen from '../styled/LoadingScreen';
@@ -95,7 +96,8 @@ export function Form({ fields, onSubmit }) {
 
 export default function Auth() {
   const { action } = useParams();
-  const [isLoading, setIsLoading] = useState(false);
+  const [, setAlert] = useContext(AlertContext);
+  const [isLoading, setIsLoading] = useLoading();
 
   const signIn = async ({ email, password }) => {
     try {

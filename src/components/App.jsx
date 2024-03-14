@@ -3,6 +3,7 @@ import ReactHelmet from 'react-helmet';
 import styled from 'styled-components';
 import { Redirect, Route, Switch } from 'wouter';
 
+import useLoading, { LoadingContext } from '../hooks/use-loading';
 import useUser from '../hooks/use-user';
 import Account from '../routes/Account';
 import Auth from '../routes/Auth';
@@ -21,8 +22,13 @@ export const Container = styled.div`
 
 function App() {
   const [user, userLoading, userError] = useUser();
+  const [isLoading, setIsLoading] = useLoading();
   const [alert] = useContext(AlertContext);
   const today = todayFn();
+
+  useEffect(() => {
+    setIsLoading(userLoading);
+  }, [userLoading, setIsLoading]);
 
   if (alert) {
     return (
@@ -43,7 +49,7 @@ function App() {
     );
   }
 
-  if (userLoading) {
+  if (isLoading) {
     return (
       <Container>
         <LoadingScreen />
@@ -68,6 +74,7 @@ function App() {
 
 function Helmet() {
   const [alert, setAlert] = useState(null);
+  const [loadingStates, setLoadingStates] = useState([]);
   const [colorScheme, setColorScheme] = useState('light');
 
   useEffect(() => {
@@ -107,7 +114,9 @@ function Helmet() {
       </ReactHelmet>
 
       <AlertContext.Provider value={[alert, setAlert]}>
-        <App />
+        <LoadingContext.Provider value={[loadingStates, setLoadingStates]}>
+          <App />
+        </LoadingContext.Provider>
       </AlertContext.Provider>
     </ErrorBoundary>
   );
