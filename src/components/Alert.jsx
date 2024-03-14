@@ -62,8 +62,9 @@ function getAlert(kind, code) {
           };
         default:
           return {
-            heading: 'An unknown error occurred',
+            heading: 'An unknown error has occurred',
             code: code,
+            isUnknown: true,
           };
       }
     };
@@ -96,10 +97,12 @@ function Alert() {
     <>
       <Heading>{alertContent.heading}</Heading>
       {alertContent.text && <Paragraph>{alertContent.text}</Paragraph>}
-      {alertContent.code && <Paragraph as="pre">Error code: {alertContent.code}</Paragraph>}
-      {kind === 'info' ? (
+      {alertContent.code && (
+        <Paragraph as="pre">Error code: {alertContent.code}</Paragraph>
+      )}
+      {!alertContent.isUnknown ? (
         <Link as="button" onClick={handleBackClick}>
-          Done
+          {kind === 'info' ? 'Done' : '← Go back'}
         </Link>
       ) : (
         <ErrorLinkSet onGoBack={handleBackClick} />
