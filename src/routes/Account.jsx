@@ -10,8 +10,9 @@ import {
 } from 'firebase/auth';
 import { getDatabase, ref, remove } from 'firebase/database';
 import styled from 'styled-components';
-import { Redirect, useLocation, useParams } from 'wouter';
+import { Redirect, useParams } from 'wouter';
 
+import useAlert from '../hooks/use-alert';
 import useUser from '../hooks/use-user';
 import Heading from '../styled/Heading';
 import Link, { LinkSet } from '../styled/Link';
@@ -34,57 +35,26 @@ async function reauthenticate(password) {
 }
 
 function AccountAction({ action }) {
-  const [, setLocation] = useLocation();
+  const [alert, setAlert] = useAlert();
 
   const changeEmail = async ({ password, email }) => {
     try {
       await reauthenticate(password);
       await updateEmail(auth.currentUser, email);
-      alert('Email updated. Verify by following email link');
-      setLocation('/account');
+      setAlert(['info', 'email-updated', '/account']);
     } catch (error) {
       console.error(error);
-      switch (error.code) {
-        case 'auth/invalid-credential':
-        case 'auth/wrong-password':
-          alert('Wrong password. Please try again');
-          break;
-        case 'auth/email-already-in-use':
-          alert('Email already in use. Please try again');
-          break;
-        case 'auth/invalid-email':
-          alert('Email invalid. Please try again');
-          break;
-        default:
-          alert(
-            `An unknown error occurred. Please try again.\n${error.message}`,
-          );
-          break;
-      }
+      setAlert(['error', error.code]);
     }
   };
   const changePassword = async ({ oldPassword, newPassword }) => {
     try {
       await reauthenticate(oldPassword);
       await updatePassword(auth.currentUser, newPassword);
-      alert('Password changed');
-      setLocation('/account');
+      setAlert(['info', 'password-updated', '/account']);
     } catch (error) {
       console.error(error);
-      switch (error.code) {
-        case 'auth/invalid-credential':
-        case 'auth/wrong-password':
-          alert('Wrong password. Please try again');
-          break;
-        case 'auth/weak-password':
-          alert('Password too weak. 6 characters minimum. Please try again');
-          break;
-        default:
-          alert(
-            `An unknown error occurred. Please try again.\n${error.message}`,
-          );
-          break;
-      }
+      setAlert(['error', error.code]);
     }
   };
   const deleteAccount = async ({ password }) => {
@@ -92,23 +62,14 @@ function AccountAction({ action }) {
       await reauthenticate(password);
       await remove(ref(db, `users/${auth.currentUser.uid}`));
       await deleteUser(auth.currentUser);
-      alert('Account deleted');
-      setLocation('/account');
+      setAlert(['info', 'account-deleted', '/']);
     } catch (error) {
       console.error(error);
-      switch (error.code) {
-        case 'auth/invalid-credential':
-        case 'auth/wrong-password':
-          alert('Wrong password. Please try again');
-          break;
-        default:
-          alert(
-            `An unknown error occurred. Please try again.\n${error.message}`,
-          );
-          break;
-      }
+      setAlert(['error', error.code]);
     }
   };
+
+  if (alert) return alert;
 
   // eslint-disable-next-line default-case
   switch (action) {
@@ -169,12 +130,8 @@ function AccountAction({ action }) {
   }
 }
 
-async function resendLink() {
-  await sendEmailVerification(auth.currentUser);
-  alert('Link sent');
-}
-
 function Account() {
+  const [alert, setAlert] = useAlert();
   const { action } = useParams();
   const [user, userLoading] = useUser();
 
@@ -183,6 +140,13 @@ function Account() {
   if (action) {
     return <AccountAction action={action} />;
   }
+
+  if (alert) return alert;
+
+  const resendLink = async () => {
+    await sendEmailVerification(auth.currentUser);
+    setAlert(['info', 'link-sent']);
+  };
 
   return (
     <>

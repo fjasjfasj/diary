@@ -5,10 +5,11 @@ import {
   sendPasswordResetEmail,
   signInWithEmailAndPassword,
 } from 'firebase/auth';
-import { useCallback, useState } from 'react';
+import { useState } from 'react';
 import styled from 'styled-components';
-import { Redirect, useLocation, useParams } from 'wouter';
+import { Redirect, useParams } from 'wouter';
 
+import useAlert from '../hooks/use-alert';
 import Heading from '../styled/Heading';
 import Link, { LinkSet } from '../styled/Link';
 import LoadingScreen from '../styled/LoadingScreen';
@@ -39,81 +40,6 @@ const Input = styled.input`
 const SubmitButton = styled.button`
   cursor: pointer;
 `;
-
-async function signIn(email, password) {
-  try {
-    const userCredential = await signInWithEmailAndPassword(
-      auth,
-      email,
-      password,
-    );
-    console.log('signed in', 'userCredential', userCredential);
-  } catch (error) {
-    console.error(error);
-    switch (error.code) {
-      case 'auth/user-not-found':
-      case 'auth/wrong-password':
-      case 'auth/invalid-credential':
-        alert('Wrong email or password. Please try again');
-        break;
-      default:
-        alert(`An unknown error occurred. Please try again.\n${error.message}`);
-        break;
-    }
-    throw error;
-  }
-}
-
-async function createAccount(email, password) {
-  try {
-    const userCredential = await createUserWithEmailAndPassword(
-      auth,
-      email,
-      password,
-    );
-    await sendEmailVerification(userCredential.user);
-    alert('Account created! Follow email link to confirm');
-    console.log('account created', 'userCredential', userCredential);
-  } catch (error) {
-    console.error(error);
-    switch (error.code) {
-      case 'auth/weak-password':
-        alert('Password too weak. 6 characters minimum. Please try again');
-        break;
-      case 'auth/email-already-in-use':
-        alert('Email already in use. Please try again');
-        break;
-      case 'auth/invalid-email':
-        alert('Email invalid. Please try again');
-        break;
-      default:
-        alert(`An unknown error occurred. Please try again.\n${error.message}`);
-        break;
-    }
-    throw error;
-  }
-}
-
-async function resetPassword(email) {
-  try {
-    await sendPasswordResetEmail(auth, email);
-    alert('Link sent. Check your email');
-  } catch (error) {
-    console.error(error);
-    switch (error.code) {
-      case 'auth/invalid-email':
-        alert('Email invalid. Please try again');
-        break;
-      case 'auth/user-not-found':
-        alert('User not found. Please try again');
-        break;
-      default:
-        alert(`An unknown error occurred. Please try again.\n${error.message}`);
-        break;
-    }
-    throw error;
-  }
-}
 
 /* field example:
   {
@@ -169,45 +95,59 @@ export function Form({ fields, onSubmit }) {
 
 export default function Auth() {
   const { action } = useParams();
-  const [, setLocation] = useLocation();
+  const [alert, setAlert] = useAlert();
   const [isLoading, setIsLoading] = useState(false);
 
-  const _signIn = useCallback(({ email, password }) => {
-    (async () => {
-      try {
-        setIsLoading(true);
-        await signIn(email, password);
-      } finally {
-        setIsLoading(false);
-      }
-    })();
-  }, []);
+  const signIn = async ({ email, password }) => {
+    try {
+      setIsLoading(true);
+      const userCredential = await signInWithEmailAndPassword(
+        auth,
+        email,
+        password,
+      );
+      console.log('signed in', 'userCredential', userCredential);
+    } catch (error) {
+      console.error(error);
+      setAlert(['error', error.code]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-  const _createAccount = useCallback(({ email, password }) => {
-    (async () => {
-      try {
-        setIsLoading(true);
-        await createAccount(email, password);
-      } finally {
-        setIsLoading(false);
-      }
-    })();
-  }, []);
+  const createAccount = async ({ email, password }) => {
+    try {
+      setIsLoading(true);
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        email,
+        password,
+      );
+      await sendEmailVerification(userCredential.user);
+      setAlert(['info', 'account-created']);
+      console.log('account created', 'userCredential', userCredential);
+    } catch (error) {
+      console.error(error);
+      setAlert(['error', error.code]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-  const _resetPassword = useCallback(
-    ({ email }) => {
-      (async () => {
-        try {
-          setIsLoading(true);
-          await resetPassword(email);
-          setLocation('/auth');
-        } finally {
-          setIsLoading(false);
-        }
-      })();
-    },
-    [setLocation],
-  );
+  const resetPassword = async ({ email }) => {
+    try {
+      setIsLoading(true);
+      await sendPasswordResetEmail(auth, email);
+      setAlert(['info', 'link-sent', '/auth']);
+    } catch (error) {
+      console.error(error);
+      setAlert(['error', error.code]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  if (alert) return alert;
 
   if (isLoading) {
     return <LoadingScreen />;
@@ -220,7 +160,7 @@ export default function Auth() {
         <Heading>Hello! Sign in to continue</Heading>
         <Form
           fields={[fieldPresets.email, fieldPresets.password]}
-          onSubmit={_signIn}
+          onSubmit={signIn}
         />
         <LinkSet>
           <li>
@@ -240,7 +180,7 @@ export default function Auth() {
         <Heading>Create an account</Heading>
         <Form
           fields={[fieldPresets.email, fieldPresets.password]}
-          onSubmit={_createAccount}
+          onSubmit={createAccount}
         />
         <LinkSet>
           <li>
@@ -255,7 +195,7 @@ export default function Auth() {
     return (
       <>
         <Heading>Reset password</Heading>
-        <Form fields={[fieldPresets.email]} onSubmit={_resetPassword} />
+        <Form fields={[fieldPresets.email]} onSubmit={resetPassword} />
         <LinkSet>
           <li>
             <Link href="/auth">← Go back</Link>
