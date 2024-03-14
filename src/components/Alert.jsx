@@ -16,13 +16,13 @@ function getAlert(kind, code) {
       case 'account-created':
         return {
           heading: 'Account created',
-          text: 'Verify by following email link',
+          text: 'Verify by following link in email',
         };
 
       case 'email-updated':
         return {
           heading: 'Email updated',
-          text: 'Verify by following email link',
+          text: 'Verify by following link in email',
         };
       case 'password-updated':
         return {
