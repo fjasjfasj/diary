@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { createContext, useContext } from 'react';
 import styled from 'styled-components';
 import { useLocation } from 'wouter';
 
@@ -84,32 +84,29 @@ function getAlert(kind, code) {
   }
 }
 
-function useAlert() {
+function Alert() {
+  const [alert, setAlert] = useContext(AlertContext);
   const [, setLocation] = useLocation();
-  const [alert, setAlert] = useState(null);
 
-  if (alert) {
-    const [kind, code, backPath] = alert;
-    const alertContent = getAlert(kind, code);
+  const [kind, code, backPath] = alert;
+  const alertContent = getAlert(kind, code);
 
-    const handleClick = () => {
-      setAlert(null);
-      if (backPath) setLocation(backPath);
-    };
+  const handleClick = () => {
+    setAlert(null);
+    if (backPath) setLocation(backPath);
+  };
 
-    return [
-      <>
-        <Heading>{alertContent.heading}</Heading>
-        {alertContent.text && <Paragraph>{alertContent.text}</Paragraph>}
-        <Link as="button" onClick={handleClick}>
-          {kind === 'info' ? 'Done' : '← Go back'}
-        </Link>
-      </>,
-      setAlert,
-    ];
-  }
-
-  return [null, setAlert];
+  return (
+    <>
+      <Heading>{alertContent.heading}</Heading>
+      {alertContent.text && <Paragraph>{alertContent.text}</Paragraph>}
+      <Link as="button" onClick={handleClick}>
+        {kind === 'info' ? 'Done' : '← Go back'}
+      </Link>
+    </>
+  );
 }
 
-export default useAlert;
+export const AlertContext = createContext([null, () => {}]);
+
+export default Alert;

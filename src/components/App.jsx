@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import ReactHelmet from 'react-helmet';
 import styled from 'styled-components';
 import { Redirect, Route, Switch } from 'wouter';
@@ -9,6 +9,7 @@ import Auth from '../routes/Auth';
 import Log from '../routes/Log';
 import LoadingScreen from '../styled/LoadingScreen';
 import { today as todayFn } from '../util/dates';
+import Alert, { AlertContext } from './Alert';
 import ErrorBoundary from './ErrorBoundary';
 import ErrorMessage from './ErrorMessage';
 
@@ -20,14 +21,25 @@ export const Container = styled.div`
 
 function App() {
   const [user, userLoading, userError] = useUser();
+  const [alert] = useContext(AlertContext);
   const today = todayFn();
+
+  if (alert) {
+    return (
+      <Container>
+        <Alert />
+      </Container>
+    );
+  }
 
   if (userError) {
     return (
-      <ErrorMessage
-        message="There's an error with your account"
-        actions={['sign-out', 'home']}
-      />
+      <Container>
+        <ErrorMessage
+          message="There's an error with your account"
+          actions={['sign-out', 'home']}
+        />
+      </Container>
     );
   }
 
@@ -55,6 +67,7 @@ function App() {
 }
 
 function Helmet() {
+  const [alert, setAlert] = useState(null);
   const [colorScheme, setColorScheme] = useState('light');
 
   useEffect(() => {
@@ -93,7 +106,9 @@ function Helmet() {
         <link rel="manifest" href={`/assets/${colorScheme}/manifest.json`} />
       </ReactHelmet>
 
-      <App />
+      <AlertContext.Provider value={[alert, setAlert]}>
+        <App />
+      </AlertContext.Provider>
     </ErrorBoundary>
   );
 }

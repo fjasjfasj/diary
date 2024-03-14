@@ -5,11 +5,11 @@ import {
   sendPasswordResetEmail,
   signInWithEmailAndPassword,
 } from 'firebase/auth';
-import { useState } from 'react';
+import { useContext, useState } from 'react';
 import styled from 'styled-components';
 import { Redirect, useParams } from 'wouter';
 
-import useAlert from '../hooks/use-alert';
+import { AlertContext } from '../components/Alert';
 import Heading from '../styled/Heading';
 import Link, { LinkSet } from '../styled/Link';
 import LoadingScreen from '../styled/LoadingScreen';
@@ -95,7 +95,7 @@ export function Form({ fields, onSubmit }) {
 
 export default function Auth() {
   const { action } = useParams();
-  const [alert, setAlert] = useAlert();
+  const [alert, setAlert] = useContext(AlertContext);
   const [isLoading, setIsLoading] = useState(false);
 
   const signIn = async ({ email, password }) => {

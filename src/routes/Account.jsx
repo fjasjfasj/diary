@@ -9,10 +9,11 @@ import {
   updatePassword,
 } from 'firebase/auth';
 import { getDatabase, ref, remove } from 'firebase/database';
+import { useContext } from 'react';
 import styled from 'styled-components';
 import { Redirect, useParams } from 'wouter';
 
-import useAlert from '../hooks/use-alert';
+import { AlertContext } from '../components/Alert';
 import useUser from '../hooks/use-user';
 import Heading from '../styled/Heading';
 import Link, { LinkSet } from '../styled/Link';
@@ -35,7 +36,7 @@ async function reauthenticate(password) {
 }
 
 function AccountAction({ action }) {
-  const [alert, setAlert] = useAlert();
+  const [alert, setAlert] = useContext(AlertContext);
 
   const changeEmail = async ({ password, email }) => {
     try {
@@ -131,7 +132,7 @@ function AccountAction({ action }) {
 }
 
 function Account() {
-  const [alert, setAlert] = useAlert();
+  const [alert, setAlert] = useContext(AlertContext);
   const { action } = useParams();
   const [user, userLoading] = useUser();
 
