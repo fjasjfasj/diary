@@ -56,9 +56,11 @@ function App() {
         {user && <Route path="/account/:action?" component={Account} />}
         {user && <Route path="/:year/:month" component={Log} />}
 
-        <Route>
-          <Redirect to={user ? `/${today.year}/${today.month}` : '/auth'} />
-        </Route>
+        {!userLoading && (
+          <Route>
+            <Redirect to={user ? `/${today.year}/${today.month}` : '/auth'} />
+          </Route>
+        )}
       </Switch>
     </Container>
   );
