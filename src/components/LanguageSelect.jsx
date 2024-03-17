@@ -10,6 +10,7 @@ const Select = styled.select`
   all: revert;
   background: transparent;
   color: inherit;
+  font-family: inherit;
   font-size: 1.1em;
   border: 0;
   border-bottom: 2px solid;
