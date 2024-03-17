@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { useLocation, useParams } from 'wouter';
 
@@ -28,23 +29,24 @@ const Footer = styled.footer`
   margin-top: 2rem;
 `;
 
-function dateToString(date) {
-  return date.toLocaleDateString('en', {
+function dateToString(date, language) {
+  return date.toLocaleDateString(language, {
     month: 'long',
     year: 'numeric',
   });
 }
 
-function makeDateLink(year, month, delta) {
+function makeDateLink(year, month, delta, language) {
   const date = new Date(year, month - 1 + delta, 1);
 
   return {
-    text: dateToString(date),
+    text: dateToString(date, language),
     href: `/${date.getFullYear()}/${date.getMonth() + 1}`,
   };
 }
 
 function Log() {
+  const { t, i18n } = useTranslation();
   const { year: yearParam, month: monthParam } = useParams();
   const year = Number(yearParam);
   const month = Number(monthParam);
@@ -60,8 +62,8 @@ function Log() {
   const today = todayFn();
   const isCurrentMonth = year === today.year && month === today.month;
 
-  const prevLink = makeDateLink(year, month, -1);
-  const nextLink = makeDateLink(year, month, 1);
+  const prevLink = makeDateLink(year, month, -1, i18n.resolvedLanguage);
+  const nextLink = makeDateLink(year, month, 1, i18n.resolvedLanguage);
 
   const entriesAmount = isCurrentMonth
     ? today.date
@@ -74,14 +76,12 @@ function Log() {
           <ul>
             <li>
               <Link href={prevLink.href}>
-                {'← '}
-                {prevLink.text}
+                {t('log.nav.links.prev', { date: prevLink.text })}
               </Link>
             </li>
             <li hidden={isCurrentMonth}>
               <Link href={nextLink.href}>
-                {nextLink.text}
-                {' →'}
+                {t('log.nav.links.next', { date: nextLink.text })}
               </Link>
             </li>
           </ul>
@@ -106,7 +106,7 @@ function Log() {
         ))}
 
       <Footer>
-        <Link href="/account">Manage account</Link>
+        <Link href="/account">{t('log.footer.links.account')}</Link>
       </Footer>
     </>
   );

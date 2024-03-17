@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
 const LoadingIcon = styled.img`
@@ -13,5 +14,6 @@ const LoadingIcon = styled.img`
 `;
 
 export default function LoadingScreen() {
-  return <LoadingIcon src="/assets/light/icon.svg" alt="Loading" />;
+  const { t } = useTranslation();
+  return <LoadingIcon src="/assets/light/icon.svg" alt={t('app.loading')} />;
 }

@@ -1,5 +1,6 @@
 import { getDatabase, ref, set } from 'firebase/database';
 import { Fragment, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import TextareaAutosize from 'react-textarea-autosize';
 import styled from 'styled-components';
 
@@ -79,6 +80,7 @@ const Textarea = styled(TextareaAutosize)`
 `;
 
 function Entry({ year, month, date, isToday, hidden }) {
+  const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(isToday);
   const [user, userLoading] = useUser();
   const dataRoot = `users/${user?.uid}/${year}/${month}/${date}`;
@@ -117,7 +119,7 @@ function Entry({ year, month, date, isToday, hidden }) {
         </DateButton>
 
         <Rate $isLoading={loading} hidden={!isOpen}>
-          <h3>How did this day go?</h3>
+          <h3>{t('entry.rate.prompt')}</h3>
 
           <StarContainer onClick={(e) => e.stopPropagation()}>
             <input
@@ -131,7 +133,7 @@ function Entry({ year, month, date, isToday, hidden }) {
               onChange={handleRateChange}
             />
             <label htmlFor={`star-${date}-0`} className="sr-only">
-              No rate
+              {t('entry.rate.values.none')}
             </label>
 
             {Array(5)
@@ -152,7 +154,10 @@ function Entry({ year, month, date, isToday, hidden }) {
                   <label htmlFor={`star-${date}-${index + 1}`}>
                     <StarButton
                       disabled={loading}
-                      aria-label={`${index + 1} of 5`}
+                      aria-label={t('entry.rate.values.any', {
+                        rate: index + 1,
+                        max: 5,
+                      })}
                     >
                       {Number(rate) >= index + 1 ? '★' : '☆'}
                     </StarButton>
@@ -164,11 +169,11 @@ function Entry({ year, month, date, isToday, hidden }) {
       </Header>
 
       <Textarea
-        value={loading ? 'Loading…' : text || ''}
+        value={loading ? t('app.loading') : text || ''}
         onChange={handleTextChange}
         minRows={4}
         disabled={loading}
-        placeholder="Something memorable about this day…"
+        placeholder={t('entry.text.prompt')}
         hidden={!isOpen}
       />
     </Container>

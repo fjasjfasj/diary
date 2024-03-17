@@ -1,5 +1,6 @@
 import { getAuth, signOut } from 'firebase/auth';
 import { Component } from 'react';
+import { useTranslation, withTranslation } from 'react-i18next';
 
 import Heading from '../styled/Heading';
 import Link, { LinkSet } from '../styled/Link';
@@ -9,6 +10,8 @@ import { Container } from './App';
 const auth = getAuth();
 
 export function ErrorLinkSet({ onGoBack }) {
+  const { t } = useTranslation();
+
   const _signOut = () => {
     signOut(auth);
   };
@@ -18,20 +21,20 @@ export function ErrorLinkSet({ onGoBack }) {
       <li>
         {onGoBack ? (
           <Link as="button" onClick={onGoBack}>
-            ← Go home
+            {t('links.home')}
           </Link>
         ) : (
-          <Link href="/">← Go home</Link>
+          <Link href="/">{t('links.home')}</Link>
         )}
       </li>
       <li>
         <Link as="button" onClick={() => window.location.reload()}>
-          Reload page
+          {t('alert.actions.error.reloadPage')}
         </Link>
       </li>
       <li>
         <Link as="button" onClick={_signOut}>
-          Sign out
+          {t('alert.actions.error.signOut')}
         </Link>
       </li>
     </LinkSet>
@@ -46,15 +49,24 @@ class ErrorBoundary extends Component {
 
   static getDerivedStateFromError(error) {
     console.error(error);
-    return { hasError: true };
+    return { hasError: true, error };
   }
 
   render() {
     if (this.state.hasError) {
+      const { t } = this.props;
+      const { error } = this.state;
       return (
         <Container>
-          <Heading>Something went wrong</Heading>
-          <Paragraph>Please try again</Paragraph>
+          <Heading>{t('alert.error.unknown.heading')}</Heading>
+          <Paragraph>{t('alert.error.unknown.text')}</Paragraph>
+          {error?.code && (
+            <Paragraph as="pre">
+              {t('alert.error.unknown.errorCode', {
+                code: error?.code,
+              })}
+            </Paragraph>
+          )}
           <ErrorLinkSet />
         </Container>
       );
@@ -64,4 +76,4 @@ class ErrorBoundary extends Component {
   }
 }
 
-export default ErrorBoundary;
+export default withTranslation()(ErrorBoundary);

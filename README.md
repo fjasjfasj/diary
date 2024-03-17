@@ -9,6 +9,15 @@ Use stars to rate a day, write something down
 
 Colors (red through purple) show mood at a glance
 
+## Features
+
+* Supports Russian and English
+* Email auth
+* Firebase Database sync
+* Some accessibility work
+* Dark theme
+* Firebase emulators in dev mode (require java)
+
 ## Tech used
 
 * React (hooks, context)
@@ -20,11 +29,3 @@ Colors (red through purple) show mood at a glance
 * ESLint, Prettier
 * Vite
 * Vite-plugin-pwa (internally workbox)
-
-## Features
-
-* Email auth
-* Firebase Database sync
-* Some accessibility work
-* Dark theme
-* Firebase emulators in dev mode (require java)

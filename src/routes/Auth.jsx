@@ -6,10 +6,12 @@ import {
   signInWithEmailAndPassword,
 } from 'firebase/auth';
 import { useContext, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { Redirect, useParams } from 'wouter';
 
 import { AlertContext } from '../components/Alert';
+import LanguageSelect from '../components/LanguageSelect';
 import useLoading from '../hooks/use-loading';
 import Heading from '../styled/Heading';
 import Link, { LinkSet } from '../styled/Link';
@@ -27,7 +29,7 @@ const FormContainer = styled.form`
 const InputContainer = styled.div`
   display: flex;
   border-bottom: 2px solid;
-  font-size: 1.3rem;
+  font-size: 1.1em;
 
   > * {
     padding: 0.5rem;
@@ -63,6 +65,7 @@ export const fieldPresets = {
 };
 
 export function Form({ fields, onSubmit }) {
+  const { t } = useTranslation();
   const [values, setValue] = useState({});
 
   const handleSubmit = (event) => {
@@ -70,7 +73,9 @@ export function Form({ fields, onSubmit }) {
     onSubmit(values);
   };
 
-  const submitButton = <SubmitButton>→</SubmitButton>;
+  const submitButton = (
+    <SubmitButton aria-label={t('auth.links.submit.ariaLabel')}>→</SubmitButton>
+  );
 
   return (
     <FormContainer onSubmit={handleSubmit}>
@@ -78,7 +83,7 @@ export function Form({ fields, onSubmit }) {
         <InputContainer key={field.key}>
           <Input
             type={field.type}
-            placeholder={field.placeholder}
+            placeholder={t(`form.fields.${field.placeholder}`)}
             required
             onChange={(e) =>
               setValue((prev) => ({
@@ -95,6 +100,7 @@ export function Form({ fields, onSubmit }) {
 }
 
 export default function Auth() {
+  const { t } = useTranslation();
   const { action } = useParams();
   const [, setAlert] = useContext(AlertContext);
   const [isLoading, setIsLoading] = useLoading();
@@ -156,19 +162,25 @@ export default function Auth() {
     // sign-in
     return (
       <>
-        <Heading>Hello! Sign in to continue</Heading>
+        <Heading>{t('auth.signIn.heading')}</Heading>
         <Form
           fields={[fieldPresets.email, fieldPresets.password]}
           onSubmit={signIn}
         />
         <LinkSet>
           <li>
-            <Link href="/auth/create-account">Create account</Link>
+            <Link href="/auth/create-account">
+              {t('auth.links.createAccount')}
+            </Link>
           </li>
           <li>
-            <Link href="/auth/reset-password">Reset password</Link>
+            <Link href="/auth/reset-password">
+              {t('auth.links.resetPassword')}
+            </Link>
           </li>
         </LinkSet>
+
+        <LanguageSelect />
       </>
     );
   }
@@ -176,14 +188,14 @@ export default function Auth() {
   if (action === 'create-account') {
     return (
       <>
-        <Heading>Create an account</Heading>
+        <Heading>{t('auth.createAccount.heading')}</Heading>
         <Form
           fields={[fieldPresets.email, fieldPresets.password]}
           onSubmit={createAccount}
         />
         <LinkSet>
           <li>
-            <Link href="/auth">← Go back</Link>
+            <Link href="/auth">{t('links.back')}</Link>
           </li>
         </LinkSet>
       </>
@@ -193,11 +205,11 @@ export default function Auth() {
   if (action === 'reset-password') {
     return (
       <>
-        <Heading>Reset password</Heading>
+        <Heading>{t('auth.resetPassword.heading')}</Heading>
         <Form fields={[fieldPresets.email]} onSubmit={resetPassword} />
         <LinkSet>
           <li>
-            <Link href="/auth">← Go back</Link>
+            <Link href="/auth">{t('links.back')}</Link>
           </li>
         </LinkSet>
       </>

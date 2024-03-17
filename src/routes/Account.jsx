@@ -10,9 +10,11 @@ import {
 } from 'firebase/auth';
 import { getDatabase, ref, remove } from 'firebase/database';
 import { useContext } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Redirect, useParams } from 'wouter';
 
 import { AlertContext } from '../components/Alert';
+import LanguageSelect from '../components/LanguageSelect';
 import useLoading from '../hooks/use-loading';
 import useUser from '../hooks/use-user';
 import Heading from '../styled/Heading';
@@ -33,6 +35,7 @@ async function reauthenticate(password) {
 }
 
 function AccountAction({ action }) {
+  const { t } = useTranslation();
   const [, setAlert] = useContext(AlertContext);
   const [, setIsLoading] = useLoading();
 
@@ -82,53 +85,51 @@ function AccountAction({ action }) {
     case 'change-email':
       return (
         <>
-          <Heading>Change email</Heading>
+          <Heading>{t('accountActions.changeEmail.heading')}</Heading>
           <Form
             fields={[
               fieldPresets.password,
               {
                 type: 'email',
-                placeholder: 'new email',
+                placeholder: 'newEmail',
                 key: 'email',
               },
             ]}
             onSubmit={changeEmail}
           />
-          <Link href="/account">← Go back</Link>
+          <Link href="/account">{t('links.back')}</Link>
         </>
       );
     case 'change-password':
       return (
         <>
-          <Heading>Change password</Heading>
+          <Heading>{t('accountActions.changePassword.heading')}</Heading>
           <Form
             fields={[
               {
                 type: 'password',
-                placeholder: 'old password',
+                placeholder: 'oldPassword',
                 key: 'oldPassword',
               },
               {
                 type: 'password',
-                placeholder: 'new password',
+                placeholder: 'newPassword',
                 key: 'newPassword',
               },
             ]}
             onSubmit={changePassword}
           />
-          <Link href="/account">← Go back</Link>
+          <Link href="/account">{t('links.back')}</Link>
         </>
       );
     case 'delete':
       return (
         <>
-          <Heading>Delete account</Heading>
-          <Paragraph>
-            This action is irreversible. Enter your password to continue.
-          </Paragraph>
+          <Heading>{t('accountActions.deleteAccount.heading')}</Heading>
+          <Paragraph>{t('accountActions.deleteAccount.text')}</Paragraph>
           <Form fields={[fieldPresets.password]} onSubmit={deleteAccount} />
 
-          <Link href="/account">← Go back</Link>
+          <Link href="/account">{t('links.back')}</Link>
         </>
       );
     default:
@@ -137,6 +138,7 @@ function AccountAction({ action }) {
 }
 
 function Account() {
+  const { t } = useTranslation();
   const [alert, setAlert] = useContext(AlertContext);
   const [, setIsLoading] = useLoading();
   const { action } = useParams();
@@ -159,36 +161,42 @@ function Account() {
 
   return (
     <>
-      <Heading>Account</Heading>
+      <Heading>{t('account.heading')}</Heading>
       <Paragraph>
-        Email: {user.email} {!user.emailVerified && ' (not verified)'}
+        {t('account.email.label', { email: user.email })}{' '}
+        {!user.emailVerified && t('account.email.notVerified')}
       </Paragraph>
       <LinkSet $direction="column">
         <li>
-          <Link href="/">← Go home</Link>
+          <Link href="/">{t('links.home')}</Link>
         </li>
         {!user.emailVerified && (
           <li>
             <Link as="button" onClick={resendLink}>
-              Resend verification link
+              {t('account.links.resendEmail')}
             </Link>
           </li>
         )}
         <li>
           <Link as="button" onClick={() => signOut(auth)}>
-            Sign out
+            {t('account.links.signOut')}
           </Link>
         </li>
         <li>
-          <Link href="/account/change-email">Change email</Link>
+          <Link href="/account/change-email">
+            {t('account.links.changeEmail')}
+          </Link>
         </li>
         <li>
-          <Link href="/account/change-password">Change password</Link>
+          <Link href="/account/change-password">
+            {t('account.links.changePassword')}
+          </Link>
         </li>
         <li>
-          <Link href="/account/delete">Delete account</Link>
+          <Link href="/account/delete">{t('account.links.deleteAccount')}</Link>
         </li>
       </LinkSet>
+      <LanguageSelect />
     </>
   );
 }
